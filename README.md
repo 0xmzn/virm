@@ -9,3 +9,7 @@ $ git clone https://github.com/mazzensaadd/virm.git
 $ cd virm
 $ sudo cp virm /usr/local/bin/
 ```
+
+## Demo
+
+![Demo GIF](virm.gif)
