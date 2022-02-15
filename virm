@@ -1,0 +1,36 @@
+#!/bin/bash
+
+
+declare -r FILENAMES_FILE=$(mktemp "${TMPDIR:-/tmp}/virm.XXX")
+
+function clean_up {
+    rm -f "$FILENAMES_FILE"
+}
+
+trap clean_up EXIT
+
+
+
+IFS=$'\r\n' GLOBIGNORE='.' command eval 'src=($(ls -a --ignore={.,..}))'
+
+
+for ((i=0;i<${#src[@]};++i)); do
+    echo "${src[i]}" >> "${FILENAMES_FILE}"
+done
+
+
+${EDITOR:-nvim} "${FILENAMES_FILE}"
+
+IFS=$'\r\n' GLOBIGNORE='*' command eval 'dest=($(cat "${FILENAMES_FILE}"))'
+
+function array_diff() {
+  awk 'BEGIN{RS=ORS=" "}
+       {NR==FNR?a[$0]++:a[$0]--}
+       END{for(k in a)if(a[k])print k}' <(echo -n "${!1}") <(echo -n "${!2}")
+}
+
+FILE_DIFF=($(array_diff src[@] dest[@]))
+
+rm -rf "${FILE_DIFF[@]}"
+
+echo "${#FILE_DIFF[@]} removed"
